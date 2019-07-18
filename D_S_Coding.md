@@ -188,3 +188,126 @@
 				
 		}
 	}
+
+
+###题目四
+有一个整形数组 arr和一个大小为w的窗口从数组的最左边开始向右边滑动，每次滑动一个位置。例如：
+
+4 3 5 4 3 3 6 7的数组和w=3的窗口，有下面的情况：
+
+【4 3 5】 4 3 3 6 7       得到结果5
+
+4 【3 5 4】 3 3 6 7       得到结果5
+
+4 3 【5 4 3 】3 6 7       得到结果5
+
+4 3 5 【4 3 3 】6 7       得到结果4
+
+4 3 5 4 【3 3 6 】7       得到结果6
+
+4 3 5 4 3 【3 6 7】       得到结果7
+
+**要求**
+
+如果数组长度为n，窗口大小为w，一共会产生n-w+1个数。
+
+要求：输入一个数组arr，窗口大小为w
+
+输出一个长度为n-w+1的res数组，表示状态下得到的最大值。
+
+例如本例题中输出结果为：5 5 5 4 6 7。
+
+**分析**
+
+现在这个题目我们能想到的就是分别遍历n次，每次再遍历w，寻找到最大值保存即可。这样时间复杂度就是O(n*w)，显然我们不应该这样做，应当去想一下有没有更好的方法来使得时间复杂度为O(n)。
+
+	import java.util.LinkedList;
+	
+	public class getMaxWindow {
+		public static int[] getMaxWindow1(int[] arr,int w) {
+			//判断是否符合标准
+			if(arr == null || w < 1 || arr.length < w) {
+				return null;
+			}
+			//创建一个双端队列执行操作
+			LinkedList<Integer> max = new LinkedList<Integer>();
+			//用于保存最后的结果输出
+			int[] res = new int[arr.length - w +1];
+			//下标用于res操作
+			int index = 0;
+			//执行1次遍历操作全部数据
+			for(int i = 0;i < arr.length;i++) {
+				//当我们的max双端队列不为空并且队列的头部小于等于传入数组的i下标时候
+				while(!max.isEmpty() && arr[max.peekFirst()] <= arr[i]) {
+					//删除尾部数据
+					max.pollLast();
+				}
+				//保存当前下标值
+				max.addLast(i);
+				//当双端队列头部等于长度时候（保存值过期）
+				if(max.peekFirst() == i - w) {
+					//删除头部节点
+					max.pollFirst();
+				}
+				//保存当前的结果值
+				if(i >= w-1) {
+					res[index++] = arr[max.peekFirst()];
+				}
+			}
+			return res;
+		}
+		public static void main(String[] args) {
+			//创建实例对象
+			getMaxWindow t1 = new getMaxWindow();
+			int[] arr = {4,3,5,4,3,3,6,7};
+			int w = 3;
+			int[] res = new int[arr.length-w+1];
+			res = t1.getMaxWindow1(arr,w);
+			//输出相应的结果
+			for(int i = 0;i < res.length;i++) {
+				System.out.print(res[i]+" ");
+			}
+		}
+	}
+
+###题目五
+打印两个有序链表的公共部分，给定两个链表的头指针head1和head2，打印两个链表的公共部分。
+
+**分析**
+
+因为时有序的，所以只需要那个大就向后移动一个值查找即可。找到相同的就输出然后两边分别后移一位。
+
+	public class printCommonPart {
+		//创建链表节点
+		public class Node{
+			public int value;
+			public Node next;
+			public Node(int val) {
+				this.value = val;
+			}
+		}
+		
+		public void printCommonPart(Node head1,Node head2) {
+			//打印相同的数
+			System.out.println("Common Part :");
+			//当节点1 2 都不为空的情况下执行
+			while(head1 != null && head2 != null) {
+				//哪一方值大就向后移动和一个节点，当两个节点相同大小时候输出，并且同时后移
+				if(head1.value < head2.value) {
+					head1 = head1.next;
+				}else if(head1.value > head2.value) {
+					head2 = head2.next;
+				}else {
+					System.out.println(head1.value + " ");
+					head1 = head1.next;
+					head2 = head2.next;
+				}
+			}
+			System.out.println();
+		}
+	
+
+
+
+
+

@@ -305,9 +305,185 @@
 			}
 			System.out.println();
 		}
-	
+###题目流六
+给定一个不含重复值的数组arr，找到每一个i位置左右两边离i最近的比arr[i]值小的位置，返回所有位置信息。不存在返回-1；
+
+例如：arr={3,4,1,5,6,2,7}
+
+结果为：{{-1，2}{0,2}{-1,-1}{2,5}{3,5}{2,-1}{5,-1}}
+
+当i = 3的时候，arr[i] = 5,其左右小的值下标为：2，5因此输出。
+
+**要求** 
+
+请分析题目，给出相应时间复杂度的解。	
+
+	public class findLessIndex {
+		public int[][] rightWay(int[] arr){
+			//定义数组用来保存下标对应的左右值
+			int[][] res = new int[arr.length][2];
+			//for循环查找
+			for(int i = 0;i < arr.length; i++) {
+				int leftLessIndex = -1;
+				int rightLessIndex = -1;
+				int cur = i-1;
+				//左边探测
+				while(cur >= 0) {
+					//如果这个值小于我们的下标位置，就保存这个值
+					if(arr[cur] < arr[i]) {
+						leftLessIndex = cur;
+						break;
+					}
+					//继续向前探测
+					cur--;
+				}
+				//开始执行右边部分，理解同上
+				cur = i +1;
+				while(cur < arr.length) {
+					if(arr[cur] < arr[i]) {
+						rightLessIndex = cur;
+						break;
+					}
+					cur++;
+				}
+				//保存我们的所得下标
+				res[i][0] = leftLessIndex;
+				res[i][1] = rightLessIndex;
+			}
+			return res;
+		}
+		
+		public static void main(String[] args) {
+			findLessIndex t1 = new findLessIndex();
+			int[] arr = {3,4,1,5,6,2,7};
+			int[][] temp ;
+			temp = t1.rightWay(arr);
+			for (int i = 0; i < temp.length; i++) {
+				System.out.print(temp[i][0] + " ");
+				System.out.println(temp[i][1]);
+			}
+		}
+	}
+	显然这样做的时间复杂度为O(n²),不太符合理想的解题思维。所以我们接下来去考录另一个方法。
+
+------------
+	public int[][] getNearLessWay(int[] arr){
+			//创建保存数组
+			int[][] res = new int[arr.length][2];
+			//创建用于操作数据的栈
+			Stack<Integer> stack = new Stack<Integer>();
+			for (int i = 0; i < arr.length; i++) {
+				//当我们栈不为空，并且栈顶元素值大于当前arr的值时候
+				while(!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
+					//弹出栈顶元素
+					int popIndex = stack.pop();
+					//如果栈为空了，说明其左边没有值小于这个数，如果有就证明这个值小于我们要查找的值
+					int leftLessIndex = stack.isEmpty() ? -1:stack.peek();
+					//赋值操作
+					res[popIndex][0] = leftLessIndex;
+					//由于当前值小于才操作，所以其右端就是我们这个i值
+					res[popIndex][1] = i;
+				}
+				//将当前值再入栈
+				stack.push(i);
+			}
+			//理解方法同上
+			while(!stack.isEmpty()) {
+				int popIndex = stack.pop();
+				int leftLessIndex = stack.isEmpty() ? -1:stack.peek();
+				res[popIndex][0] = leftLessIndex;
+				res[popIndex][1] = -1;
+			}
+			return res;
+		}
+###题目七
+给定两个字符串str1和str2，返回两个字符串中最长的公共子串序列。
+
+**例如**
+
+str1 = 1A2C3D4B56  以及 str2 = B1D23CA45B6A
+
+得到结果123456或者12C4B6  都是最长公共子序列。返回其一即可。
+
+
+题目讲解可以去查阅B站视频：UID **315496975**
+
+	public class longestcomsubsequence {
+		//用于得到二位数组的方法
+		public int[][] getdb(char[] str1,char[] str2){
+			//创建dp用于保存得到的二维数组值
+			int[][] dp = new  int[str1.length][str2.length];
+			dp[0][0] = str1[0] == str2[0] ? 1:0;
+			//先保证行列的0位置有值
+			for(int i = 1; i < str1.length;i++) {
+				dp[i][0] =Math.max(dp[i-1][0],str1[i] == str2[0] ? 1:0);
+			}
+			for(int i = 1; i < str2.length;i++) {
+				dp[0][i] =Math.max(dp[0][i-1],str1[0] == str2[i] ? 1:0);
+			}
+			//两个for循环开始操作数组，找到最大值放到当前位置，如果数据相同再+1
+			for(int i = 1; i < str1.length;i++) {
+				for(int j = 1; j < str2.length;j++) {
+					//判断左和上的最大值然后赋值
+					dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+					if(str1[i] == str2[j]) {
+						//当值相同的时候，就找到最大值或者左上方值+1比较
+						dp[i][j] = Math.max(dp[i][j],dp[i-1][j-1]+1);
+					}
+				}
+			}
+			return dp;
+		}
+		//得到结果方法
+		public String getLastvalue(String str1,String str2) {
+			//首先判断str1和str2是否有值，我们这里不做判断
+			
+			//转换成char类型的数据
+			char[] chs1 = str1.toCharArray();
+			char[] chs2 = str2.toCharArray();
+			int[][] dp = getdb(chs1, chs2);
+			int m = chs1.length-1;
+			int n = chs2.length-1;
+			//c创建res用于保存最后结果
+			char[] res = new char[dp[m][n]];
+			int index = res.length-1;
+			//开始探索
+			while(index>=0) {
+				//如果矩阵值上下相等，就上移一位
+				if(n > 0 && dp[m][n] == dp[m][n-1]) {
+					n--;
+					//如果矩阵值左右相等，就左移一位
+				}else if(m > 0 && dp[m][n] == dp[m-1][n]) {
+					m--;
+					//如果值相同就左上方一位
+				}else {
+					res[index--] = chs1[m];
+					m--;
+					n--;
+				}
+			}
+			return String.valueOf(res);
+		}
+		public static void main(String[] args) {
+			String str1 = "1A2C3D4B56";
+			String str2 = "B1D23CA45B6A";
+			longestcomsubsequence t1 = new longestcomsubsequence();
+			String Temp = t1.getLastvalue(str1, str2);
+			System.out.println(Temp);
+		}
+	}
 
 
 
 
 
+###题目八
+给定两个字符串str1和str2，返回两个字符串中最长的公共子序列。
+
+**例如**
+
+str1 = 1AB2345CD  以及 str2 = 12345EF
+
+得到结果为：2345
+
+想一下能否利用上一题的大致思想解决这个问题呢？
